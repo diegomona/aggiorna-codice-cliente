@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Richiesta LMA - Codifica cliente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #444;
+    }
+
+    input[type="text"] {
+      width: 40%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      text-align: center;
+    }
+	
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #cccccc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #999999;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    #messaggio {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Richiesta LMA - Codifica cliente</h2>
+    <form id="codiceForm" novalidate>
+      <label for="codiceCliente">Inserisci il codice:</label>
+      <input type="text" id="codiceCliente" name="codiceCliente" maxlength="6" pattern="^\d{1,6}$" required/>
+      <div class="error-message" id="errorMsg">Il codice deve contenere solo cifre numeriche.</div>
+      <br>
+      <button type="submit">Invia</button>
+      <p id="messaggio"></p>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('codiceForm');
+    const messaggio = document.getElementById('messaggio');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const codiceCliente = document.getElementById('codiceCliente').value;
+
+      if (!/^\d{6}$/.test(codiceCliente)) {
+        errorMsg.style.display = 'block';
+        messaggio.textContent = '';
+        return;
+      } else {
+        errorMsg.style.display = 'none';
+      }
+
+      try {
+        const response = await fetch('/aggiorna_codice', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ codiceCliente })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messaggio.textContent = 'Codice aggiornato con successo!';
+          messaggio.style.color = 'green';
+        } else {
+          messaggio.textContent = `Errore: ${data.message || 'Problema nel backend'}`;
+          messaggio.style.color = 'red';
+        }
+      } catch (error) {
+        messaggio.textContent = `Errore di rete: ${error.message}`;
+        messaggio.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
